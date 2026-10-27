@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTS Meet & Greet — Application</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --bg:#fafafb;--paper:#fff;--ink:#0f0f1a;--ink-2:#1a1a2e;
+    --muted:#6b6b7d;--line:#e8e8f0;--line-2:#f5f5fa;
+    --purple:#6b21a8;--purple-dark:#4c1580;--purple-soft:#f3e8ff;
+    --pink:#ec4899;--pink-soft:#fce7f3;
+    --gold:#d4a55a;--green:#10b981;--red:#dc2626;
+  }
+  html,body{height:100%;}
+  body{
+    font-family:'Inter',-apple-system,sans-serif;
+    background:var(--bg);color:var(--ink);
+    min-height:100vh;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .nav{
+    padding:14px 32px;
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--paper);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:100;
+  }
+  .brand{display:flex;align-items:center;gap:11px;}
+  .brand-mark{
+    width:36px;height:36px;border-radius:10px;
+    background:linear-gradient(135deg,var(--purple),var(--pink));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:17px;font-weight:800;
+  }
+  .brand-name{
+    font-family:'Playfair Display',serif;
+    font-size:19px;font-weight:700;letter-spacing:-0.02em;
+  }
+  .brand-name span{color:var(--purple);}
+  .back{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;}
+  .back:hover{color:var(--purple);}
+
+  /* LIVE PREVIEW BAR */
+  .live-preview{
+    background:linear-gradient(135deg,#faf5ff,#fef2f8);
+    border-bottom:1px solid var(--line);
+    padding:12px 32px;
+    display:flex;gap:24px;align-items:center;
+    overflow-x:auto;
+    position:sticky;top:65px;z-index:99;
+    font-size:12.5px;
+  }
+  .live-preview::-webkit-scrollbar{height:0;}
+  .lp-item{
+    display:flex;align-items:center;gap:8px;
+    white-space:nowrap;color:var(--muted);font-weight:500;
+  }
+  .lp-item .lp-label{
+    font-size:10.5px;text-transform:uppercase;
+    letter-spacing:0.08em;color:#9a9aae;font-weight:700;
+  }
+  .lp-item .lp-value{
+    color:var(--ink);font-weight:600;
+    max-width:180px;overflow:hidden;text-overflow:ellipsis;
+  }
+  .lp-item .lp-value.empty{color:#c5c5d4;font-style:italic;font-weight:400;}
+  .lp-item .lp-dot{width:6px;height:6px;border-radius:50%;background:#d0d0dd;}
+  .lp-item .lp-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green);}
+
+  .progress-bar{
+    background:var(--paper);
+    padding:14px 32px;
+    display:flex;justify-content:center;align-items:center;gap:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .progress-step{
+    display:flex;align-items:center;gap:7px;
+    font-size:12px;font-weight:600;color:var(--muted);
+    padding:6px 12px;border-radius:999px;
+    transition:all .2s;
+  }
+  .progress-step .num{
+    width:22px;height:22px;border-radius:50%;
+    background:var(--line-2);color:#a0a0b0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;
+  }
+  .progress-step.active{background:var(--purple-soft);color:var(--purple);}
+  .progress-step.active .num{background:var(--purple);color:#fff;}
+  .progress-step.done{color:var(--green);}
+  .progress-step.done .num{background:var(--green);color:#fff;}
+
+  .wrap{max-width:820px;margin:0 auto;padding:36px 24px 100px;}
+
+  .head{text-align:center;margin-bottom:32px;}
+  .head h1{
+    font-family:'Playfair Display',serif;
+    font-size:32px;font-weight:700;
+    letter-spacing:-0.025em;line-height:1.15;margin-bottom:10px;
+  }
+  .head h1 span{color:var(--purple);font-style:italic;}
+  .head p{font-size:14px;color:var(--muted);line-height:1.6;}
+
+  /* SECTIONS */
+  .section{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:28px 28px 24px;
+    margin-bottom:20px;
+    transition:all .3s;
+    opacity:0.55;
+    pointer-events:none;
+  }
+  .section.unlocked{opacity:1;pointer-events:auto;}
+  .section.completed{
+    border-color:#bbf7d0;
+    background:linear-gradient(180deg,#ffffff,#f8fffb);
+  }
+  .section-head{
+    display:flex;align-items:center;gap:14px;
+    margin-bottom:22px;padding-bottom:16px;
+    border-bottom:1px solid var(--line-2);
+  }
+  .section-num{
+    width:38px;height:38px;border-radius:11px;
+    background:var(--purple-soft);color:var(--purple);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:700;flex-shrink:0;
+    transition:all .3s;
+    font-family:'Playfair Display',serif;
+  }
+  .section.completed .section-num{background:var(--green);color:#fff;}
+  .section-head-text{flex:1;}
+  .section-head-text h3{
+    font-size:17px;font-weight:700;
+    letter-spacing:-0.01em;line-height:1.2;
+  }
+  .section-head-text p{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .section-badge{
+    font-size:11px;font-weight:700;
+    padding:5px 11px;border-radius:999px;
+    background:var(--line-2);color:#a0a0b0;
+    letter-spacing:0.03em;
+    transition:all .3s;
+  }
+  .section.completed .section-badge{background:#dcfce7;color:#166534;}
+  .section.active .section-badge{background:var(--purple-soft);color:var(--purple);}
+
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block;font-size:13px;font-weight:600;
+    color:var(--ink);margin-bottom:8px;
+    letter-spacing:0.005em;
+  }
+  .field label .req{color:var(--red);margin-left:2px;}
+  .field label .hint{color:var(--muted);font-weight:400;font-size:11.5px;margin-left:6px;}
+
+  .field input[type="text"],
+  .field input[type="email"],
+  .field input[type="tel"],
+  .field input[type="number"],
+  .field select,
+  .field textarea{
+    width:100%;padding:13px 15px;
+    background:#fafafb;
+    border:1.5px solid var(--line);
+    border-radius:11px;
+    font-family:inherit;font-size:14.5px;
+    color:var(--ink);
+    transition:all .2s;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder{color:#c0c0d0;}
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
+    outline:none;
+    border-color:var(--purple);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(107,33,168,0.08);
+  }
+  .field textarea{resize:vertical;min-height:100px;line-height:1.6;}
+  .field select{
+    cursor:pointer;appearance:none;
+    background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b21a8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 15px center;
+    background-size:16px;
+    padding-right:42px;
+  }
+
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  /* PHOTO */
+  .photo-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;
+  }
+  .photo-btn{
+    padding:22px 14px;
+    background:#fafafb;
+    border:1.5px dashed var(--line);
+    border-radius:12px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:7px;
+    font-family:inherit;color:var(--ink);
+    transition:all .2s;
+  }
+  .photo-btn:hover{border-color:var(--purple);background:var(--purple-soft);}
+  .photo-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .photo-btn .p-icon{font-size:24px;}
+  .photo-btn .p-label{font-size:12.5px;font-weight:600;}
+  .photo-btn .p-sub{font-size:11px;color:var(--muted);}
+
+  .photo-previews{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:10px;margin-top:12px;
+  }
+  .photo-thumb{
+    position:relative;aspect-ratio:1;
+    border-radius:10px;overflow:hidden;
+    border:1.5px solid var(--line);background:#000;
+    animation:pop .35s ease;
+  }
+  @keyframes pop{from{transform:scale(0.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .photo-thumb .rm{
+    position:absolute;top:5px;right:5px;
+    width:24px;height:24px;border-radius:50%;
+    background:rgba(0,0,0,0.75);color:#fff;
+    border:none;cursor:pointer;font-size:11px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .photo-thumb .rm:hover{background:var(--red);}
+  .photo-thumb .upload-tick{
+    position:absolute;bottom:5px;left:5px;
+    width:22px;height:22px;border-radius:50%;
+    background:rgba(16,185,129,0.95);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;
+  }
+
+  .photo-count{
+    font-size:12px;color:var(--muted);
+    margin-top:10px;text-align:center;font-weight:500;
+  }
+  .photo-count strong{color:var(--purple);font-weight:700;}
+
+  .submit{
+    width:100%;padding:18px;
+    background:var(--ink);color:#fff;
+    font-family:inherit;font-size:16px;font-weight:700;
+    letter-spacing:0.01em;
+    border:none;border-radius:12px;
+    cursor:pointer;transition:all .25s;
+    box-shadow:0 10px 26px rgba(15,15,26,0.25);
+    margin-top:28px;
+  }
+  .submit:hover:not(:disabled){
+    background:var(--purple);
+    transform:translateY(-2px);
+    box-shadow:0 14px 32px rgba(107,33,168,0.35);
+  }
+  .submit:disabled{
+    background:#d5d5e0;cursor:not-allowed;box-shadow:none;
+  }
+
+  .status{
+    margin-top:16px;padding:14px 16px;
+    border-radius:10px;font-size:13.5px;font-weight:600;
+    text-align:center;display:none;
+  }
+  .status.show{display:block;}
+  .status.info{background:#eef2ff;color:#4338ca;}
+  .status.ok{background:#ecfdf5;color:#059669;}
+  .status.err{background:#fef2f2;color:#dc2626;}
+
+  /* CAMERA */
+  .cam-modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(15,10,26,0.92);align-items:center;justify-content:center;padding:20px;}
+  .cam-modal.open{display:flex;}
+  .cam-inner{width:100%;max-width:520px;background:var(--paper);border-radius:18px;overflow:hidden;}
+  .cam-head{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);}
+  .cam-head h4{font-size:15px;font-weight:700;}
+  .cam-close{width:32px;height:32px;border-radius:50%;background:#f4f4f8;border:none;cursor:pointer;font-size:14px;color:var(--ink);display:flex;align-items:center;justify-content:center;}
+  .cam-close:hover{background:var(--red);color:#fff;}
+  .cam-stage{position:relative;aspect-ratio:4/3;background:#000;overflow:hidden;}
+  #cameraVideo{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
+  .cam-guide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+  .guide-inner{width:55%;aspect-ratio:3/4;border:2px dashed rgba(255,255,255,0.55);border-radius:50% 50% 46% 46% / 55% 55% 45% 45%;position:relative;}
+  .guide-inner::before{content:"Align your face";position:absolute;top:-28px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,0.9);white-space:nowrap;font-weight:600;background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:6px;letter-spacing:0.05em;}
+  .cam-count{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:110px;font-weight:800;color:#fff;text-shadow:0 0 40px var(--purple);background:rgba(0,0,0,0.4);}
+  .cam-count.show{display:flex;}
+  .cam-foot{padding:16px 20px;display:flex;gap:10px;}
+  .cam-btn{flex:1;padding:13px;font-family:inherit;font-size:13.5px;font-weight:600;border:none;border-radius:10px;cursor:pointer;transition:all .2s;}
+  .cam-btn.primary{background:var(--ink);color:#fff;}
+  .cam-btn.primary:hover{background:var(--purple);}
+  .cam-btn.ghost{background:#f4f4f8;color:var(--ink);}
+
+  @media (max-width:900px){
+    .nav{padding:12px 16px;}
+    .brand-mark{width:32px;height:32px;font-size:14px;}
+    .brand-name{font-size:16px;}
+    .back{font-size:12px;}
+    .live-preview{padding:10px 16px;gap:16px;top:59px;}
+    .lp-item .lp-label{font-size:9.5px;}
+    .lp-item .lp-value{font-size:11.5px;max-width:110px;}
+    .progress-bar{padding:12px 16px;gap:4px;overflow-x:auto;}
+    .progress-step{font-size:10.5px;padding:5px 8px;gap:5px;}
+    .progress-step .num{width:18px;height:18px;font-size:10px;}
+    .wrap{padding:24px 14px 60px;}
+    .head h1{font-size:22px;}
+    .head p{font-size:13px;}
+    .section{padding:22px 18px 18px;border-radius:14px;}
+    .section-head-text h3{font-size:15px;}
+    .section-head-text p{font-size:11.5px;}
+    .section-num{width:34px;height:34px;font-size:14px;}
+    .field-row{grid-template-columns:1fr;}
+    .photo-grid{grid-template-columns:1fr;}
+    .photo-previews{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">
+    <div class="brand-mark">B</div>
+    <div class="brand-name">BTS<span>.</span>Meet</div>
+  </div>
+  <a class="back" href="index.html">← Back</a>
+</nav>
+
+<!-- LIVE PREVIEW -->
+<div class="live-preview">
+  <div class="lp-item"><span class="lp-dot" id="dot-name"></span><span class="lp-label">Name:</span><span class="lp-value empty" id="pv-name">—</span></div>
+  <div class="lp-item"><span class="lp-dot" id="dot-country"></span><span class="lp-label">Country:</span><span class="lp-value empty" id="pv-country">—</span></div>
+  <div class="lp-item"><span class="lp-dot" id="dot-fav"></span><span class="lp-label">Favourite:</span><span class="lp-value empty" id="pv-fav">—</span></div>
+  <div class="lp-item"><span class="lp-dot" id="dot-photo"></span><span class="lp-label">Photos:</span><span class="lp-value" id="pv-photo">0</span></div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-bar">
+  <div class="progress-step active" id="step1"><div class="num">1</div><span>Personal</span></div>
+  <div class="progress-step" id="step2"><div class="num">2</div><span>Story</span></div>
+  <div class="progress-step" id="step3"><div class="num">3</div><span>Photo</span></div>
+</div>
+
+<div class="wrap">
+
+  <div class="head">
+    <h1>Apply for <span>BTS Meet & Greet</span></h1>
+    <p>Fill the form below. Each section is sent to our team as soon as it's complete.</p>
+  </div>
+
+  <form id="applyForm" novalidate>
+
+    <!-- SECTION 1 -->
+    <div class="section unlocked active" id="sec1" data-section="1">
+      <div class="section-head">
+        <div class="section-num">I</div>
+        <div class="section-head-text">
+          <h3>Personal Information</h3>
+          <p>Your basic details</p>
+        </div>
+        <div class="section-badge" id="badge1">In progress</div>
+      </div>
+
+      <div class="field">
+        <label>Full name <span class="req">*</span></label>
+        <input type="text" id="fullName" placeholder="e.g. Sarah Mitchell" autocomplete="name">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Age <span class="req">*</span></label>
+          <input type="number" id="age" placeholder="18" min="10" max="99">
+        </div>
+        <div class="field">
+          <label>Country <span class="req">*</span></label>
+          <select id="country">
+            <option value="">Select</option>
+            <option>Bangladesh</option><option>India</option><option>USA</option>
+            <option>UK</option><option>South Korea</option><option>Japan</option>
+            <option>Philippines</option><option>Indonesia</option><option>Thailand</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>City <span class="req">*</span></label>
+        <input type="text" id="city" placeholder="e.g. Dhaka">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Phone <span class="req">*</span></label>
+          <input type="tel" id="phone" placeholder="+880 1XXX-XXXXXX" autocomplete="tel">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section" id="sec2" data-section="2">
+      <div class="section-head">
+        <div class="section-num">II</div>
+        <div class="section-head-text">
+          <h3>Your Story</h3>
+          <p>Why you should be selected</p>
+        </div>
+        <div class="section-badge" id="badge2">Locked</div>
+      </div>
+
+      <div class="field">
+        <label>Favourite member <span class="req">*</span></label>
+        <select id="favMember">
+          <option value="">Select member</option>
+          <option>RM (Kim Namjoon)</option><option>Jin (Kim Seokjin)</option>
+          <option>Suga (Min Yoongi)</option><option>J-Hope (Jung Hoseok)</option>
+          <option>Jimin (Park Jimin)</option><option>V (Kim Taehyung)</option>
+          <option>Jungkook (Jeon Jungkook)</option><option>All of them</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Why should we select you? <span class="req">*</span></label>
+        <textarea id="reason" placeholder="Tell us your ARMY story in a few honest words..." maxlength="500"></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="section" id="sec3" data-section="3">
+      <div class="section-head">
+        <div class="section-num">III</div>
+        <div class="section-head-text">
+          <h3>Your Photo</h3>
+          <p>Each photo is sent instantly</p>
+        </div>
+        <div class="section-badge" id="badge3">Locked</div>
+      </div>
+
+      <div class="photo-grid">
+        <button type="button" class="photo-btn" id="btnCamera">
+          <span class="p-icon">📷</span>
+          <span class="p-label">Camera</span>
+          <span class="p-sub">Take selfie</span>
+        </button>
+        <button type="button" class="photo-btn" id="btnUpload">
+          <span class="p-icon">📁</span>
+          <span class="p-label">Upload</span>
+          <span class="p-sub">From gallery</span>
+        </button>
+      </div>
+
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+
+      <div class="photo-previews" id="photoPreviews"></div>
+
+      <div class="photo-count" id="photoCount">
+        <strong>0</strong> / 5 photos added
+      </div>
+    </div>
+
+    <button type="submit" class="submit" id="btnSubmit" disabled>
+      Submit Complete Application
+    </button>
+
+    <div class="status" id="formStatus"></div>
+
+  </form>
+
+</div>
+
+<!-- CAMERA MODAL -->
+<div class="cam-modal" id="camModal">
+  <div class="cam-inner">
+    <div class="cam-head">
+      <h4>Take a selfie</h4>
+      <button type="button" class="cam-close" id="camClose">✕</button>
+    </div>
+    <div class="cam-stage">
+      <video id="cameraVideo" autoplay playsinline muted></video>
+      <div class="cam-guide"><div class="guide-inner"></div></div>
+      <div class="cam-count" id="camCountdown">3</div>
+    </div>
+    <div class="cam-foot">
+      <button type="button" class="cam-btn ghost" id="camCancel">Cancel</button>
+      <button type="button" class="cam-btn primary" id="camCapture">Capture</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="hiddenCanvas" style="display:none;"></canvas>
+<script src="apply.js"></script>
+
+</body>
+</html>
